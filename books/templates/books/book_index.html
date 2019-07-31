@@ -1,0 +1,45 @@
+{% extends "books/base.html" %}
+{% load bootstrap %}
+{% block content %}
+
+    <div class="cointainer">
+        <form method="GET">
+            {{ filter.form|bootstrap}}
+            <button type="Submit" class="btn btn-primary">Search</button>
+        </form>
+         <p>
+        {% for book in filter.qs %}
+            <p>
+            <li>
+         <div class="title">
+                 Title: {{book.title}}
+            </div>
+            <div class="authors">
+                 Authors: {% for name in book.authors.all %}
+                                    {{ name.author }},
+                                {% endfor %}
+            </div>
+            <div class="published_date">
+                 Published: {{book.published_date}}
+            </div>
+            <div class="pages">
+                 Pages: {{book.pages}}
+            </div>
+            <div class="language">
+                 Language: {{book.language}}
+            </div>
+            <div class="Identifiers">
+                 Industry indetifiers:
+                {% for identifier in book.industry_identifiers.all %}
+                <br>{{ identifier.type }} : {{ identifier.identifier }}
+                {% endfor %}
+            </div>
+            <div class="image">
+                 {{book.image}}
+            </div>
+        {% endfor %}
+
+    </li>
+
+    </div>
+{% endblock %}

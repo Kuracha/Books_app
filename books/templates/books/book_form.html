@@ -1,0 +1,36 @@
+{% extends "books/base.html" %}
+{% load bootstrap %}
+{% block content %}
+        <h1>Add Book</h1>
+        <form action="." method="post">
+            {% csrf_token %}
+            <div>
+                {{ form.as_p }}
+            </div>
+            <fieldset>
+                <legend>Industry Identifiers</legend>
+                {{ identifiers_form.management_form }}
+                {{ identifiers_form.non_form_errors }}
+                {% for form in identifiers_form %}
+                    {{ form.as_p }}
+                {% endfor %}
+            </fieldset>
+            <fieldset>
+                <legend>Authors</legend>
+                {{ authors_form.management_form }}
+                {{ authors_form.non_form_errors }}
+                {% for form in authors_form %}
+                    {{ form.as_p }}
+                {% endfor %}
+            </fieldset>
+            <fieldset>
+                <legend>Images</legend>
+                {{ images_form.management_form }}
+                {{ images_form.non_form_errors }}
+                {% for form in images_form %}
+                    {{ form.as_p }}
+                {% endfor %}
+            </fieldset>
+            <input type="submit" value="Add book" class="submit" />
+        </form>
+{% endblock %}
