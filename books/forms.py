@@ -50,4 +50,5 @@ class BookForm(forms.ModelForm):
 
 class SearchBookForm(forms.Form):
     keyword = forms.CharField(max_length=100)
-    apikey = forms.CharField(max_length=100)
+
+

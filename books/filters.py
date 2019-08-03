@@ -9,7 +9,7 @@ class BookFilter(FilterSet):
         model = Book
         fields = {
             'title': ['icontains', ],
-            'published_date': ['iexact', ],
+            'published_date': ['icontains', ],
             'authors__author': ['icontains', ],
             'language': ['iexact', ],
         }
