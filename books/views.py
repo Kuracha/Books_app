@@ -1,8 +1,12 @@
-from django.views.generic import CreateView, ListView, FormView
+import requests
+
+from django.contrib import messages
+from django.views.generic import CreateView, ListView
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
-from django.shortcuts import render, redirect
-from .models import Book, IndustryIdentifier, Author, ImageLink
+from django.shortcuts import render
+
+from .models import Book
 from .forms import \
     IndustryIdentifiersFormSet, \
     AuthorsFormSet, \
@@ -13,8 +17,6 @@ from .forms import \
     IndustryIdentifiersForm, \
     ImageLinkForm
 from .filters import BookFilter
-
-import requests
 
 
 class IndexView(ListView):
@@ -94,63 +96,45 @@ class GoogleBooks(CreateView):
     def add_title(self, book):
         if book['volumeInfo']['title']:
             return book['volumeInfo']['title']
-        else:
-            return "No data"
 
     def add_author(self, author):
         if author:
             return author
-        else:
-            return None
 
     def add_published_date(self, book):
         date = book['volumeInfo'].get('publishedDate')
         if date:
             return book['volumeInfo']['publishedDate']
-        else:
-            return None
 
     def add_language(self, book):
         date = book['volumeInfo'].get('language')
         if date:
             return book['volumeInfo']['language']
-        else:
-            return None
 
     def add_identifier_type(self, identifier):
         if identifier["type"]:
             return identifier["type"]
-        else:
-            return None
 
     def add_identifier(self, identifier):
         if identifier["identifier"]:
             return identifier["identifier"]
-        else:
-            return None
 
     def add_pages(self, book):
         pages = book['volumeInfo'].get('pageCount')
         if pages:
             return book['volumeInfo']['pageCount']
-        else:
-            return None
 
     def add_small_thumbnail(self, book):
-        small_thumbnail = book['volumeInfo']['imageLinks'].get('smallThumbnail')
+        small_thumbnail = book['volumeInfo'].get('imageLinks')
         if small_thumbnail:
             return book['volumeInfo']['imageLinks']['smallThumbnail']
-        else:
-            return None
 
     def add_thumbnail(self, book):
-        thumbnail = book['volumeInfo']['imageLinks'].get('thumbnail')
+        thumbnail = book['volumeInfo'].get('imageLinks')
         if thumbnail:
             return book['volumeInfo']['imageLinks']['thumbnail']
-        else:
-            return None
 
-    def search(self, value, apikey=""):
+    def search_for_books(self, value, apikey=""):
         params = {'q': value, 'key': apikey}
         google_books = requests.get(url="https://www.googleapis.com/books/v1/volumes", params=params)
         books_json = google_books.json()
@@ -167,7 +151,8 @@ class GoogleBooks(CreateView):
         form_2 = self.form_class_search(self.request.POST)
         if form_2.is_valid():
             keyword = form_2.cleaned_data['keyword']
-            books = self.search(keyword)
+            books = self.search_for_books(keyword)
+
             if books:
                 for book in books:
                     title = self.add_title(book)
@@ -180,142 +165,52 @@ class GoogleBooks(CreateView):
                          'pages': pages,
                          'language': language}
                     )
-                    if form.is_valid():
-                        if form.cleaned_data["title"] not in Book.objects.values_list('title', flat=True):
-                            self.object = form.save()
+                    if form.is_valid() and form.cleaned_data["title"] not in Book.objects.values_list('title', flat=True):
+                        self.object = form.save()
 
-                            small_thumbnail = self.add_small_thumbnail(book)
-                            thumbnail = self.add_thumbnail(book)
-                            form_thumbnail = self.form_class_thumbnail(
-                                {'small_thumbnail': small_thumbnail,
-                                 'thumbnail': thumbnail,
-                                 'book': self.object.id}
-                            )
-                            print(form_thumbnail)
-                            if form_thumbnail.is_valid():
-                                form_thumbnail.save()
+                        small_thumbnail = self.add_small_thumbnail(book)
+                        thumbnail = self.add_thumbnail(book)
+                        form_thumbnail = self.form_class_thumbnail(
+                            {'small_thumbnail': small_thumbnail,
+                                'thumbnail': thumbnail,
+                                'book': self.object.id}
+                        )
+                        if form_thumbnail.is_valid():
+                            form_thumbnail.save()
 
-                        for author in book['volumeInfo']['authors']:
-                            author = self.add_author(author)
-                            form_author = self.form_class_author(
-                                {'author': author,
-                                 'book': self.object.id}
-                            )
-                            if form_author.is_valid():
-                                form_author.save()
+                        if book['volumeInfo'].get('author'):
+                            for author in book['volumeInfo']['authors']:
+                                author = self.add_author(author, book)
+                                form_author = self.form_class_author(
+                                    {'author': author,
+                                        'book': self.object.id}
+                                )
+                                if form_author.is_valid():
+                                    form_author.save()
 
-                        for identifier in book['volumeInfo']['industryIdentifiers']:
-                            identifier_type = self.add_identifier_type(identifier)
-                            identifier = self.add_identifier(identifier)
-                            form_industryidentifier = self.form_class_identifier(
-                                {'type': identifier_type,
-                                 'identifier': identifier,
-                                 'book': self.object.id}
-                            )
-                            if form_industryidentifier.is_valid():
-                                form_industryidentifier.save()
+                        if book['volumeInfo'].get('industryIdentifiers'):
+                            for identifier in book['volumeInfo']['industryIdentifiers']:
+                                identifier_type = self.add_identifier_type(identifier)
+                                identifier = self.add_identifier(identifier)
+                                form_industryidentifier = self.form_class_identifier(
+                                    {'type': identifier_type,
+                                        'identifier': identifier,
+                                        'book': self.object.id}
+                                )
+                                if form_industryidentifier.is_valid():
+                                    form_industryidentifier.save()
 
-                return HttpResponseRedirect(reverse_lazy('index_books'))
+                messages.success(request, "Books added to database, "
+                                          "remember that if added books already exist in database "
+                                          "then won't be added second time")
+                return HttpResponseRedirect(reverse_lazy('import_books'))
+            else:
+                messages.warning(request, "Couldn't find any books with provided keyword")
+                return HttpResponseRedirect(reverse_lazy('import_books'))
+
         else:
-            return HttpResponseRedirect(reverse_lazy('index_books'))
+            messages.error(request, "Provided keyword is invalid")
+            return HttpResponseRedirect(reverse_lazy('import_books'))
 
 
-
-
-
-        # self.object = None
-        # form = self.form_class(initial={"title": "initial_data"})
-        # form_2 = self.form_class_2(self.request.POST)
-        # identifiers_form = IndustryIdentifiersFormSet()
-        # authors_form = AuthorsFormSet()
-        # images_form = ImageLinkFormset()
-        # if form.is_valid() and identifiers_form.is_valid() and authors_form.is_valid() and images_form.is_valid():
-        # if form_2.is_valid():
-        #         keyword = form_2.cleaned_data['keyword']
-        #         books = self.search(keyword)
-            # if books:
-            #     for book in books:
-            #         self.object = form.save(commit=False)
-            #         self.object.title = self.add_title(book)
-            #         self.object.published_date = self.add_published_date(book)
-            #         self.object.pages = self.add_pages(book)
-            #         self.object.language = self.add_language(book)
-            #         self.object.save()
-            #
-            #         for identifier in book['volumeInfo']['industryIdentifiers']:
-            #             identifiers_form.instance = self.object
-            #             industry_identifiers = identifiers_form.save(commit=False)
-            #             industry_identifiers.type = self.add_identifier_type(identifier)
-            #             industry_identifiers.identifier = self.add_identifier(identifier)
-            #             industry_identifiers.save()
-            #
-            #         for author in book['volumeInfo']['authors']:
-            #             authors_form.instance = self.object
-            #             authors = authors_form.save(commit=False)
-            #             authors.author = self.add_author(author)
-            #             authors.save()
-            #
-            #         images_form.instance = self.object
-            #         images = images_form.save(commit=False)
-            #         images.small_thumbnail = self.add_small_thumbnail(book)
-            #         images.thumbnail = self.add_thumbnail(book)
-            #         images.save()
-            #         return HttpResponseRedirect(self.get_success_url())
-            # else:
-            #     return HttpResponseRedirect(reverse_lazy('index_books'))
-            # return self.form_valid(form, form_2,  identifiers_form, authors_form, images_form)
-        # else:
-            # return self.form_invalid(form, identifiers_form, authors_form, images_form)
-
-    # def form_valid(self, form, form_2, identifiers_form, authors_form, images_form):
-        # keyword = form_2.cleaned_data['keyword']
-        # books = self.search(keyword)
-        # if books:
-        #     for book in books:
-        #         self.object = form.save(commit=False)
-        #         self.object.title = self.add_title(book)
-        #         self.object.published_date = self.add_published_date(book)
-        #         self.object.pages = self.add_pages(book)
-        #         self.object.language = self.add_language(book)
-        #         self.object.save()
-        #
-        #         for identifier in book['volumeInfo']['industryIdentifiers']:
-        #             identifiers_form.instance = self.object  #TODO Check in database if object already exist
-        #             industry_identifiers = identifiers_form.save(commit=False)
-        #             industry_identifiers.type = self.add_identifier_type(identifier)
-        #             industry_identifiers.identifier = self.add_identifier(identifier)
-        #             industry_identifiers.save()
-        #
-        #         for author in book['volumeInfo']['authors']:
-        #             authors_form.instance = self.object
-        #             authors = authors_form.save(commit=False)
-        #             authors.author = self.add_author(author)
-        #             authors.save()
-        #
-        #         images_form.instance = self.object
-        #         images = images_form.save(commit=False)
-        #         images.small_thumbnail = self.add_small_thumbnail(book)
-        #         images.thumbnail = self.add_thumbnail(book)
-        #         images.save()
-        #         return HttpResponseRedirect(self.get_success_url())
-        # else:
-        #     return HttpResponseRedirect(reverse_lazy('index_books'))
-
-        # if form.is_valid():
-        #     keyword = form.cleaned_data['keyword']
-        #     books = self.search(keyword)
-        #     if books:
-        #         for book in books:
-        #             form_2 = self.form_class_2(self.request.POST, initial={"title": self.add_title(book)})
-        #             if form_2.is_valid():
-        #                 new_book = form_2.save(commit=False)
-        #                 new_book.
-        #
-        #                 return HttpResponseRedirect(self.get_success_url())
-        #             else:
-        #                 return HttpResponseRedirect(reverse_lazy('index_books'))
-        #     else:
-        #         return HttpResponseRedirect(reverse_lazy('import_books'))
-        #
-        # return reverse_lazy('import_books')
 
