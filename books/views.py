@@ -17,11 +17,13 @@ from .forms import \
     IndustryIdentifiersForm, \
     ImageLinkForm
 from .filters import BookFilter
+from django.conf import settings
 
 
 class IndexView(ListView):
     model = Book
     template_name = 'books/book_index.html'
+    paginate_by = 4
     context_object_name = 'books'
     queryset = Book.objects.all()
 
@@ -134,7 +136,7 @@ class GoogleBooks(CreateView):
         if thumbnail:
             return book['volumeInfo']['imageLinks']['thumbnail']
 
-    def search_for_books(self, value, apikey=""):
+    def search_for_books(self, value, apikey=settings.APIKEY):
         params = {'q': value, 'key': apikey}
         google_books = requests.get(url="https://www.googleapis.com/books/v1/volumes", params=params)
         books_json = google_books.json()
@@ -178,9 +180,9 @@ class GoogleBooks(CreateView):
                         if form_thumbnail.is_valid():
                             form_thumbnail.save()
 
-                        if book['volumeInfo'].get('author'):
+                        if book['volumeInfo'].get('authors'):
                             for author in book['volumeInfo']['authors']:
-                                author = self.add_author(author, book)
+                                author = self.add_author(author)
                                 form_author = self.form_class_author(
                                     {'author': author,
                                         'book': self.object.id}

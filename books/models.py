@@ -76,7 +76,7 @@ class ImageLink(models.Model):
         Book,
         on_delete=models.CASCADE,
         verbose_name='Book',
-        related_name='images')
+        related_name='thumbnails')
 
     def __str__(self):
         return f'{self.small_thumbnail} and {self.thumbnail} from {self.book}'

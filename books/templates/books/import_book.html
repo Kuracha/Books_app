@@ -1,5 +1,4 @@
 {% extends "books/base.html" %}
-{% load bootstrap %}
 {% block content %}
 
 	{% if messages %}
@@ -12,8 +11,9 @@
 
     <form method='post' action=''>
 						{%csrf_token%}
+						Insert keyword:
 						<input type="text" name="keyword">
-						<input type='submit' value='Szukaj'>
+						<button type="Submit" class="btn btn-primary">Search</button>
 					</form>
 
 {% endblock %}

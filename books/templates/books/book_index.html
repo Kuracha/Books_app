@@ -1,45 +1,69 @@
 {% extends "books/base.html" %}
 {% load bootstrap %}
+{% load staticfiles %}
+
 {% block content %}
 
     <div class="cointainer">
-        <form method="GET">
-            {{ filter.form|bootstrap}}
+
+        <div id="filter">
+
+            <form method="GET">
+            {{ filter.form}}
             <button type="Submit" class="btn btn-primary">Search</button>
+                <div style='clear:both;'></div>
         </form>
-         <p>
+
+        </div>
+
+        <div id="main">
+
+            <p>
         {% for book in filter.qs %}
             <p>
-            <li>
-         <div class="title">
+
+            <div class="book">
+
+                <div class="title">
                  Title: {{book.title}}
-            </div>
-            <div class="authors">
-                 Authors: {% for name in book.authors.all %}
+                </div>
+
+                <div class="authors">
+                    Authors: {% for name in book.authors.all %}
                                     {{ name.author }},
                                 {% endfor %}
+                </div>
+
+                <div class="published_date">
+                    Published: {{book.published_date}}
+                </div>
+
+                <div class="pages">
+                    Pages: {{book.pages}}
+                </div>
+
+                <div class="language">
+                    Language: {{book.language}}
+                </div>
+
+                <div class="Identifiers">
+                    Industry indetifiers:
+                    {% for identifier in book.industry_identifiers.all %}
+                    <br>{{ identifier.type }} : {{ identifier.identifier }}
+                    {% endfor %}
+                </div>
+
+                <div class="thumbnail">
+                    {% for thumbnail in book.thumbnails.all %}
+                    <p>
+                       <img src="{{thumbnail.thumbnail}}" >
+                    {% endfor %}
+                </div>
+
             </div>
-            <div class="published_date">
-                 Published: {{book.published_date}}
-            </div>
-            <div class="pages">
-                 Pages: {{book.pages}}
-            </div>
-            <div class="language">
-                 Language: {{book.language}}
-            </div>
-            <div class="Identifiers">
-                 Industry indetifiers:
-                {% for identifier in book.industry_identifiers.all %}
-                <br>{{ identifier.type }} : {{ identifier.identifier }}
-                {% endfor %}
-            </div>
-            <div class="image">
-                 {{book.image}}
-            </div>
+
         {% endfor %}
 
-    </li>
+        </div>
 
-    </div>
 {% endblock %}

@@ -1,0 +1,25 @@
+version: '3.7'
+
+services:
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - 8000:8000
+    enviornment:
+      - DEBUG=1
+      - SECRET_KEY=foo
+    depends_on:
+      - db
+
+  db:
+      image: postgres:latest
+      volumes:
+        - postgres_data:/var/lib/postgresql/data/
+      environment:
+        - POSTGRES_USER=postgresql
+        - POSTGRES_PASSWORD=postgresql
+        - POSTGRES_DB=postgresql
+
+volumes:
+  postgresd_data:

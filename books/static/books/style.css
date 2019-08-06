@@ -23,6 +23,24 @@ a:hover
 	text-decoration:none;
 }
 
+form
+{
+    width: 100%;
+    height: 100%;
+    margin: auto;
+   position: relative;
+}
+
+
+input, label
+{
+   width: 200px;
+   height: 30px;
+   padding: 5px 5px;
+  margin: 5px 0;
+  display:block;
+ }
+
 #container
 {
 	width:1800px;
@@ -32,7 +50,7 @@ a:hover
 
 #menu
 {
-	width:1774px;
+	width:1350px;
 	background-color:#151B4F;
 	margin-top:30px;
 	padding-left:20px;
@@ -52,6 +70,63 @@ a:hover
 
 #content
 	{
+	    width:1500px;
 		margin-top:20px;
 		margin-bottom:20px;
 	}
+
+#filter
+{
+		width:250px;
+		float:left;
+		padding:20px;
+		background-color:#151B4F;
+		font-size:20px;
+		border-right:2px dotted #ffffff;
+	}
+
+
+	#main
+	{
+		background-color:#bbbbbb;
+		height:auto;
+		width:1100px;
+		float:left;
+		padding-left:30px;
+		padding-right:30px;
+		padding-bottom:50px;
+		padding-top:20px;
+	}
+
+    .book
+		{
+			width:500px;
+			height:450px;
+			margin:10px;
+			text-align:left;
+			float:left;
+			color:#000000;
+			bottom:0px;
+		}
+
+			.paginator
+		{
+			color:#000000;
+			clear:both;
+			margin-top:20px;
+			font-size:30px;
+		}
+				.paginator a:link
+				{
+					color:#000000;
+				}
+
+				.paginator a:visited
+				{
+					color:#000000;
+				}
+
+				.paginator a:hover
+				{
+					color:#000000;
+				}
