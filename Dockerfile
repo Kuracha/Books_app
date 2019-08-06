@@ -14,4 +14,4 @@ RUN pip install pipenv
 RUN chmod +x ./entrypoint.sh
 RUN pip install --no-cache-dir -r requirements.txt
 
-ENTRYPOINT [ "/bin/sh", "./entrypoint.sh" ]
+ENTRYPOINT ["sh","./entrypoint.sh" ]
