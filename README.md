@@ -28,7 +28,9 @@ or http://192.168.99.100:1337/path/to/template/ `
 ## CONFIGURATION OF .env AND .env.db
 
 I'm using postgresql db created in ElephantSQL so DB_ environments can be different depending 
-on used database and servicee
+on used database and service
+
+.env
 ```
 DEBUG=0 #set 1 if you want to run Dockerized app in production mode
 ALLOWED_HOSTS=here are allowed hosts
@@ -41,4 +43,10 @@ DB_USER=setdbusernamehere
 DB_PASSWORD=setdbpasswordhere
 DB_HOST=manny.db.elephantsql.com
 DB_PORT=5432
+```
+.env.db
+```
+POSTGRES_USER=setdbusernamehere #same as DB_USER
+POSTGRES_PASSWORD=setdbpasswordhere #same as DB_PASSWORD
+POSTGRES_DB=postgresql_prod
 ```
