@@ -1,13 +1,14 @@
 # Books_app
-
 To run Books_app by command line:
 1. `python3 -m venv /path/to/venv`
 2. `cd /path/to/venv/bin/activate`
 3. `pip install -r requirements.txt`
-4. `./manage.py createsuperuser`
-5. `in directory with settings.py in project create and configure .env`
-6. `./manage.py runserver` 
-7. Go to `127.0.0.1:8000/path/to/template/`
+4.`py manage.py makemigrations`
+5.`py manage.py migrate`
+6. `py manage.py createsuperuser`
+7. `in directory with settings.py in project create and configure .env`
+8. `./manage.py runserver` 
+9. Go to `127.0.0.1:8000/path/to/template/`
 
 To run Books_app in Docker in development mode:
 1. `run docker and go to project root directory`
