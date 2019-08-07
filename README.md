@@ -6,7 +6,7 @@ To run Books_app by command line:
 4. `py manage.py makemigrations`
 5. `py manage.py migrate`
 6. `py manage.py createsuperuser`
-7. `in directory with settings.py in project create and configure .env`
+7. `in same project directory as settings.py create and configure .env`
 8. `./manage.py runserver` 
 9. Go to `127.0.0.1:8000/path/to/template/`
 
