@@ -1,5 +1,4 @@
 # Books_app
-
 To run Books_app by command line:
 1. `python3 -m venv /path/to/venv`
 2. `cd /path/to/venv/bin/activate`
@@ -51,4 +50,5 @@ DB_PORT=5432
 POSTGRES_USER=setdbusernamehere #same as DB_USER
 POSTGRES_PASSWORD=setdbpasswordhere #same as DB_PASSWORD
 POSTGRES_DB=postgresql_prod
-```
+<<<<<<< HEAD
+
