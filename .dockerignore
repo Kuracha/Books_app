@@ -1,0 +1,21 @@
+# Unneeded folders
+.git
+
+# Unneeded files
+.gitattributes
+.gitignore
+Makefile
+README.md
+Vagrantfile
+docker-compose.yml
+docker-compose.prod.yml
+*.sublime-project
+*.sublime-workspace
+
+*.o
+*.so
+*.pyc
+*.log
+*.org
+**/*.pyc
+

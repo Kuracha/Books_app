@@ -75,18 +75,13 @@ class BookCreate(CreateView):
             authors_form.save()
             thumbnail_form.instance = self.object
             thumbnail_form.save()
-            
-            request = self.request
-            messages.success(request, f"Book added to database")
+
             return HttpResponseRedirect(reverse_lazy('add_books'))
         else:
-            messages.warning(self.request, f"Book of provided title already exist in database")
             return HttpResponseRedirect(reverse_lazy('add_books'))
 
     def form_invalid(self, form, identifiers_form, authors_form, thumbnail_form):
-        messages.warning(self.request, f"Form is filled incorrectly")
         return self.render_to_response(self.get_context_data(
-            request=self.request,
             form=form,
             identifiers_form=identifiers_form,
             authors_form=authors_form,
