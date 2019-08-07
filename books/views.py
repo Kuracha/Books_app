@@ -1,36 +1,38 @@
-import requests
-
 from django.contrib import messages
-from django.views.generic import CreateView, ListView
+from django.views.generic import CreateView
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.shortcuts import render
+from django_filters.views import FilterView
 
+from .caches import CacheMixin
+from .books_importer import BooksImporter
+from .filters import BookFilter
 from .models import Book
 from .forms import \
     IndustryIdentifiersFormSet, \
     AuthorsFormSet, \
-    ImageLinkFormset, \
+    ThumbnailLinkFormset, \
     BookForm, \
     SearchBookForm, \
     AuthorsForm, \
     IndustryIdentifiersForm, \
-    ImageLinkForm
-from .filters import BookFilter
-from django.conf import settings
+    ThumbnailLinkForm
 
 
-class IndexView(ListView):
+class IndexView(CacheMixin, FilterView):
+    cache_timeout = 90
+    filterset_class = BookFilter
     model = Book
     template_name = 'books/book_index.html'
     paginate_by = 4
     context_object_name = 'books'
     queryset = Book.objects.all()
 
-    def get_context_data(self, **kwargs):
-        context = super(IndexView, self).get_context_data(**kwargs,)
-        context['filter'] = BookFilter(self.request.GET, queryset=self.get_queryset())
-        return context
+    # def get_context_data(self, **kwargs):
+    #     context = super(IndexView, self).get_context_data(**kwargs,)
+    #     context['filter'] = BookFilter(self.request.GET, queryset=self.get_queryset())
+    #     return context
 
 
 class BookCreate(CreateView):
@@ -44,12 +46,12 @@ class BookCreate(CreateView):
         form = self.form_class()
         identifiers_form = IndustryIdentifiersFormSet
         authors_form = AuthorsFormSet
-        images_form = ImageLinkFormset
+        thumbnail_form = ThumbnailLinkFormset
         return self.render_to_response(self.get_context_data(
             form=form,
             identifiers_form=identifiers_form,
             authors_form=authors_form,
-            images_form=images_form,
+            thumbnail_form=thumbnail_form,
         ))
 
     def post(self, request, *args, **kwargs):
@@ -57,92 +59,49 @@ class BookCreate(CreateView):
         form = self.form_class(self.request.POST)
         identifiers_form = IndustryIdentifiersFormSet(self.request.POST)
         authors_form = AuthorsFormSet(self.request.POST)
-        images_form = ImageLinkFormset(self.request.POST)
+        thumbnail_form = ThumbnailLinkFormset(self.request.POST)
 
-        if form.is_valid() and identifiers_form.is_valid() and authors_form.is_valid() and images_form.is_valid():
-            return self.form_valid(form, identifiers_form, authors_form, images_form)
+        if form.is_valid() and identifiers_form.is_valid() and authors_form.is_valid() and thumbnail_form.is_valid():
+            return self.form_valid(form, identifiers_form, authors_form, thumbnail_form)
         else:
-            return self.form_invalid(form, identifiers_form, authors_form, images_form)
+            return self.form_invalid(form, identifiers_form, authors_form, thumbnail_form)
 
-    def form_valid(self, form, identifiers_form, authors_form, images_form):
+    def form_valid(self, form, identifiers_form, authors_form, thumbnail_form):
         if form.cleaned_data["title"] not in Book.objects.values_list('title', flat=True):
             self.object = form.save()
             identifiers_form.instance = self.object
             identifiers_form.save()
             authors_form.instance = self.object
             authors_form.save()
-            images_form.instance = self.object
-            images_form.save()
-            return HttpResponseRedirect(self.get_success_url())
+            thumbnail_form.instance = self.object
+            thumbnail_form.save()
+            
+            request = self.request
+            messages.success(request, f"Book added to database")
+            return HttpResponseRedirect(reverse_lazy('add_books'))
         else:
-            return HttpResponseRedirect(reverse_lazy('index_books'))
+            messages.warning(self.request, f"Book of provided title already exist in database")
+            return HttpResponseRedirect(reverse_lazy('add_books'))
 
-    def form_invalid(self, form, identifiers_form, authors_form, images_form):
+    def form_invalid(self, form, identifiers_form, authors_form, thumbnail_form):
+        messages.warning(self.request, f"Form is filled incorrectly")
         return self.render_to_response(self.get_context_data(
+            request=self.request,
             form=form,
             identifiers_form=identifiers_form,
             authors_form=authors_form,
-            images_form=images_form,
+            thumbnail_form=thumbnail_form,
         ))
 
 
-class GoogleBooks(CreateView):
+class GoogleBooks(BooksImporter):
     model = Book
     form_class_book = BookForm
     form_class_search = SearchBookForm
     form_class_identifier = IndustryIdentifiersForm
     form_class_author = AuthorsForm
-    form_class_thumbnail = ImageLinkForm
+    form_class_thumbnail = ThumbnailLinkForm
     template_name = 'books/import_book.html'
-
-    def add_title(self, book):
-        if book['volumeInfo']['title']:
-            return book['volumeInfo']['title']
-
-    def add_author(self, author):
-        if author:
-            return author
-
-    def add_published_date(self, book):
-        date = book['volumeInfo'].get('publishedDate')
-        if date:
-            return book['volumeInfo']['publishedDate']
-
-    def add_language(self, book):
-        date = book['volumeInfo'].get('language')
-        if date:
-            return book['volumeInfo']['language']
-
-    def add_identifier_type(self, identifier):
-        if identifier["type"]:
-            return identifier["type"]
-
-    def add_identifier(self, identifier):
-        if identifier["identifier"]:
-            return identifier["identifier"]
-
-    def add_pages(self, book):
-        pages = book['volumeInfo'].get('pageCount')
-        if pages:
-            return book['volumeInfo']['pageCount']
-
-    def add_small_thumbnail(self, book):
-        small_thumbnail = book['volumeInfo'].get('imageLinks')
-        if small_thumbnail:
-            return book['volumeInfo']['imageLinks']['smallThumbnail']
-
-    def add_thumbnail(self, book):
-        thumbnail = book['volumeInfo'].get('imageLinks')
-        if thumbnail:
-            return book['volumeInfo']['imageLinks']['thumbnail']
-
-    def search_for_books(self, value, apikey=settings.APIKEY):
-        params = {'q': value, 'key': apikey}
-        google_books = requests.get(url="https://www.googleapis.com/books/v1/volumes", params=params)
-        books_json = google_books.json()
-        if 'items' in books_json:
-            bookshelf = books_json['items']
-            return bookshelf
 
     def get(self, request, *args, **kwargs):
         form_2 = self.form_class_search()

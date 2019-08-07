@@ -63,7 +63,7 @@ class Author(models.Model):
         return self.author
 
 
-class ImageLink(models.Model):
+class Thumbnail(models.Model):
     small_thumbnail = models.URLField(
         default=None,
         blank=True,

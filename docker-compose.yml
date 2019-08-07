@@ -3,10 +3,10 @@ version: '3.7'
 services:
   web:
     build: .
-    command: sh -c './wait-for-it.sh db:5432' python manage.py runserver 0.0.0.0:8000
+    command: sh -c "./wait-for db:5432 && python manage.py makemigrations && python manage.py migrate --fake && python manage.py collectstatic --no-input  && python manage.py runserver 0.0.0.0:8000"
     ports:
       - 8000:8000
-    enviornment:
+    environment:
       - DEBUG=1
       - SECRET_KEY=foo
     depends_on:
@@ -15,11 +15,11 @@ services:
   db:
       image: postgres:latest
       volumes:
-        - postgres_data:/var/lib/postgresql/data/
+        - postgres_data:/var/lib/postgresql_dev/data/
       environment:
         - POSTGRES_USER=postgresql
         - POSTGRES_PASSWORD=postgresql
         - POSTGRES_DB=postgresql
 
 volumes:
-  postgresd_data:
+  postgres_data:

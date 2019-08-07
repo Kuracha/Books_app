@@ -9,7 +9,6 @@ RUN mkdir -p /usr/src/app
 
 WORKDIR /usr/src/app
 
-COPY ./entrypoint.sh /usr/src/app/entrypoint.sh
 COPY . .
 
 RUN pip install --upgrade pip

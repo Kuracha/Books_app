@@ -24,10 +24,10 @@
                 {% endfor %}
             </fieldset>
             <fieldset>
-                <legend>Images</legend>
-                {{ images_form.management_form }}
-                {{ images_form.non_form_errors }}
-                {% for form in images_form %}
+                <legend>Thumbnails</legend>
+                {{ thumbnail_form.management_form }}
+                {{ thumbnail_form.non_form_errors }}
+                {% for form in thumbnail_form %}
                     {{ form.as_p }}
                 {% endfor %}
             </fieldset>

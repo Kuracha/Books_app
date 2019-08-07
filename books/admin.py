@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import IndustryIdentifier, Book, Author, ImageLink
+from .models import IndustryIdentifier, Book, Author, Thumbnail
 
 
 class BookAdmin(admin.ModelAdmin):
@@ -32,4 +32,4 @@ class ImageLinksAdmin(admin.ModelAdmin):
     list_display = ('small_thumbnail', 'thumbnail', 'book')
 
 
-admin.site.register(ImageLink, ImageLinksAdmin)
+admin.site.register(Thumbnail, ImageLinksAdmin)

@@ -1,7 +1,7 @@
 from django import forms
 from django.forms.models import inlineformset_factory
 
-from .models import Book, IndustryIdentifier, Author, ImageLink
+from .models import Book, IndustryIdentifier, Author, Thumbnail
 
 
 class IndustryIdentifiersForm(forms.ModelForm):
@@ -29,15 +29,15 @@ AuthorsFormSet = inlineformset_factory(
 )
 
 
-class ImageLinkForm(forms.ModelForm):
+class ThumbnailLinkForm(forms.ModelForm):
 
     class Meta:
-        model = ImageLink
+        model = Thumbnail
         exclude = ()
 
 
-ImageLinkFormset = inlineformset_factory(
-    Book, ImageLink, form=ImageLinkForm, fields=['small_thumbnail', 'thumbnail'], extra=1, can_delete=False
+ThumbnailLinkFormset = inlineformset_factory(
+    Book, Thumbnail, form=ThumbnailLinkForm, fields=['small_thumbnail', 'thumbnail'], extra=1, can_delete=False
 )
 
 

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models import Book, Author, IndustryIdentifier, ImageLink
+from ..models import Book, Author, IndustryIdentifier, Thumbnail
 
 
 class AuthorSerializer(serializers.ModelSerializer):
@@ -16,18 +16,18 @@ class IndustryIdentifierSerializer(serializers.ModelSerializer):
         fields = ('type', 'identifier')
 
 
-class ImageLinkSerializer(serializers.ModelSerializer):
+class ThumbnailSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = ImageLink
+        model = Thumbnail
         fields = ('thumbnail', 'small_thumbnail')
 
 
 class BookSerializer(serializers.ModelSerializer):
     authors = AuthorSerializer(many=True)
     industry_identifiers = IndustryIdentifierSerializer(many=True)
-    images = ImageLinkSerializer(many=True)
+    thumbnails = ThumbnailSerializer(many=True)
 
     class Meta:
         model = Book
-        fields = ('title', 'published_date', 'pages', 'language', 'authors', 'industry_identifiers', 'images')
+        fields = ('title', 'published_date', 'pages', 'language', 'authors', 'industry_identifiers', 'thumbnails')

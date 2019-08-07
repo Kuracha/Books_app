@@ -19,7 +19,7 @@
         <div id="main">
 
             <p>
-        {% for book in filter.qs %}
+        {% for book in object_list %}
             <p>
 
             <div class="book">
@@ -56,13 +56,31 @@
                 <div class="thumbnail">
                     {% for thumbnail in book.thumbnails.all %}
                     <p>
+                        thumbnails:<br>
                        <img src="{{thumbnail.thumbnail}}" >
+                        <img src="{{thumbnail.small_thumbnail}}" >
                     {% endfor %}
                 </div>
 
             </div>
 
         {% endfor %}
+
+            {% if is_paginated %}
+              <div class="paginator">
+                  <div>
+                    {% if page_obj.has_previous %}
+                      <a href="?page={{ page_obj.previous_page_number }}"><</a>
+                    {% endif %}
+
+                    <span class="small">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+                    {% if page_obj.has_next %}
+                      <a href="?page={{ page_obj.next_page_number }}">></a>
+                    {% endif %}
+                  </div>
+              </div>
+            {% endif %}
 
         </div>
 
