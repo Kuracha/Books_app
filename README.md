@@ -50,5 +50,5 @@ DB_PORT=5432
 POSTGRES_USER=setdbusernamehere #same as DB_USER
 POSTGRES_PASSWORD=setdbpasswordhere #same as DB_PASSWORD
 POSTGRES_DB=postgresql_prod
-<<<<<<< HEAD
+
 
